@@ -26,16 +26,10 @@ FROM php:8.4-cli-bookworm
 # libjpeg62-turbo-dev و libfreetype6-dev برای پشتیبانی کامل gd (JPEG/فونت) اضافه شده‌اند.
 # این‌ها دلیل اصلی این‌اند که از یک Dockerfile سفارشی استفاده می‌کنیم
 # و نمی‌توانیم از بیلدپک‌های پیش‌فرض PHP-only (مثل Railpack) استفاده کنیم.
-#
-# نکته درباره فونت: پکیج fonts-vazirmatn اصلاً در ریپوی apt دبیان نسخه bookworm
-# منتشر نشده (فقط در trixie/sid موجوده)، برای همین به‌جای apt، فایل‌های ttf رو
-# مستقیم از ریلیز رسمی گیت‌هاب دانلود می‌کنیم؛ این روش به نسخه دبیان وابسته نیست.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libreoffice \
         poppler-utils \
         fontconfig \
-        curl \
-        ca-certificates \
         unzip \
         libzip-dev \
         libpng-dev \
@@ -45,11 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxml2-dev \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install pdo pdo_mysql zip gd \
-    && mkdir -p /usr/share/fonts/truetype/vazirmatn \
-    && for weight in Thin ExtraLight Light Regular Medium SemiBold Bold ExtraBold Black; do \
-         curl -fsSL -o "/usr/share/fonts/truetype/vazirmatn/Vazirmatn-${weight}.ttf" \
-           "https://raw.githubusercontent.com/rastikerdar/vazirmatn/v33.003/fonts/ttf/Vazirmatn-${weight}.ttf"; \
-       done \
     && fc-cache -f \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
