@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libreoffice \
         poppler-utils \
         fontconfig \
-        fonts-vazir \
+        fonts-vazirmatn \
         unzip \
         libzip-dev \
         libpng-dev \
