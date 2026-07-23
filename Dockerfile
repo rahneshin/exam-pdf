@@ -18,11 +18,14 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 # ---- مرحله ۳: ایمیج نهایی اجرا ----
-FROM php:8.3-cli-bookworm
+# نکته: composer.lock پروژه Laravel 13 / Symfony 8.x را قفل کرده که به PHP >=8.4.1
+# نیاز دارد؛ به همین دلیل ایمیج runtime هم باید 8.4 باشد، نه 8.3.
+FROM php:8.4-cli-bookworm
 
 # LibreOffice برای تبدیل DOCX->PDF، poppler-utils برای pdftoppm.
-# این دو مورد دلیل اصلی این‌اند که از یک Dockerfile سفارشی استفاده می‌کنیم
-# و نمی‌توانیم از بیلدپک‌های پیش‌فرض PHP-only استفاده کنیم.
+# libjpeg62-turbo-dev و libfreetype6-dev برای پشتیبانی کامل gd (JPEG/فونت) اضافه شده‌اند.
+# این‌ها دلیل اصلی این‌اند که از یک Dockerfile سفارشی استفاده می‌کنیم
+# و نمی‌توانیم از بیلدپک‌های پیش‌فرض PHP-only (مثل Railpack) استفاده کنیم.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libreoffice \
         poppler-utils \
@@ -31,8 +34,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         libzip-dev \
         libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
         libonig-dev \
         libxml2-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install pdo pdo_mysql zip gd \
     && fc-cache -f \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
