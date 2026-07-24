@@ -3,13 +3,20 @@
 namespace App\Services;
 
 use App\Exceptions\DocumentRenderException;
-use TCPDF;
+use FPDF;
 
 /**
  * Assembles a set of page PNGs into a single, image-only PDF -- one full
  * page per image, no text layer, no OCR. Each page is sized to match its
  * source image so the exam's original layout/orientation is preserved
  * exactly rather than being forced into a fixed A4 frame.
+ *
+ * Uses FPDF rather than TCPDF: this step never renders text (only places
+ * pre-rasterised page images), and FPDF's built-in core fonts ship as
+ * plain PHP files with the package -- no separate font-asset build step
+ * is required, unlike tecnickcom/tcpdf >=7, which needs its fonts
+ * generated via a FontForge-based build pipeline that isn't run by a
+ * normal `composer install`.
  */
 class ImagesToPdfMerger
 {
@@ -18,17 +25,9 @@ class ImagesToPdfMerger
      */
     public function merge(array $pngAbsolutePaths, string $destinationAbsolutePath): void
     {
-        $pdf = new TCPDF('P', 'pt', 'A4');
-        // Strip metadata as much as TCPDF allows.
-        $pdf->SetCreator('');
-        $pdf->SetAuthor('');
-        $pdf->SetTitle('');
-        $pdf->SetSubject('');
-        $pdf->SetKeywords('');
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-        $pdf->SetMargins(0, 0, 0);
+        $pdf = new FPDF('P', 'pt', 'A4');
         $pdf->SetAutoPageBreak(false);
+        $pdf->SetMargins(0, 0, 0);
 
         foreach ($pngAbsolutePaths as $imagePath) {
             [$widthPx, $heightPx] = getimagesize($imagePath) ?: [null, null];
@@ -47,21 +46,18 @@ class ImagesToPdfMerger
 
             $orientation = $widthPt > $heightPt ? 'L' : 'P';
             $pdf->AddPage($orientation, [$widthPt, $heightPt]);
-            $pdf->Image($imagePath, 0, 0, $widthPt, $heightPt, '', '', '', false, 300);
+            $pdf->Image($imagePath, 0, 0, $widthPt, $heightPt);
         }
 
-        if ($pdf->getNumPages() === 0) {
+        if ($pdf->PageNo() === 0) {
             throw DocumentRenderException::noPagesGenerated();
         }
 
-        $pdf->Output($destinationAbsolutePath, 'F');
+        $pdf->Output('F', $destinationAbsolutePath);
     }
 
     private function guessDpi(string $imagePath): int
     {
-        $info = getimagesize($imagePath);
-        $resolution = $info['channels'] ?? null; // not reliable via getimagesize alone
-
         // getimagesize doesn't expose DPI reliably for PNG; we fall back to
         // the DPI the pipeline requested pdftoppm to render at, injected via
         // config so page size stays proportionate to the on-screen render.
