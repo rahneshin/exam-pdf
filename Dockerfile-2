@@ -24,15 +24,12 @@ FROM php:8.4-cli-bookworm
 
 # LibreOffice برای تبدیل DOCX->PDF، poppler-utils برای pdftoppm.
 # libjpeg62-turbo-dev و libfreetype6-dev برای پشتیبانی کامل gd (JPEG/فونت) اضافه شده‌اند.
-# libonig-dev برای ساخت اکستنشن mbstring لازم است (phpoffice/phpword و
-# tecnickcom/tcpdf برای متن فارسی/RTL به mbstring وابسته‌اند).
 # این‌ها دلیل اصلی این‌اند که از یک Dockerfile سفارشی استفاده می‌کنیم
 # و نمی‌توانیم از بیلدپک‌های پیش‌فرض PHP-only (مثل Railpack) استفاده کنیم.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libreoffice \
         poppler-utils \
         fontconfig \
-        fonts-vazir \
         unzip \
         libzip-dev \
         libpng-dev \
@@ -41,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libonig-dev \
         libxml2-dev \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
-    && docker-php-ext-install pdo pdo_mysql zip gd mbstring \
+    && docker-php-ext-install pdo pdo_mysql zip gd \
     && fc-cache -f \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
