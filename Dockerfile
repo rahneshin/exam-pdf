@@ -28,12 +28,17 @@ FROM php:8.4-cli-bookworm
 # tecnickcom/tcpdf برای متن فارسی/RTL به mbstring وابسته‌اند).
 # این‌ها دلیل اصلی این‌اند که از یک Dockerfile سفارشی استفاده می‌کنیم
 # و نمی‌توانیم از بیلدپک‌های پیش‌فرض PHP-only (مثل Railpack) استفاده کنیم.
+#
+# نکته: پکیج fonts-vazir در مخزن Debian bookworm وجود ندارد (فقط در
+# نسخه‌های جدیدتر Debian به اسم fonts-vazirmatn موجوده). چون کد از
+# EXAMDOCS_DEFAULT_FONT=Vazirmatn استفاده می‌کنه، فونت رو مستقیم از
+# ریلیز رسمی GitHub دانلود و نصب می‌کنیم.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libreoffice \
         poppler-utils \
         fontconfig \
-        fonts-vazir \
         unzip \
+        curl \
         libzip-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
@@ -42,6 +47,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxml2-dev \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install pdo pdo_mysql zip gd mbstring \
+    && mkdir -p /usr/share/fonts/truetype/vazirmatn \
+    && curl -fL -o /tmp/vazirmatn.zip \
+        https://github.com/rastikerdar/vazirmatn/releases/download/v33.003/vazirmatn-v33.003.zip \
+    && unzip -j /tmp/vazirmatn.zip 'fonts/ttf/*.ttf' -d /usr/share/fonts/truetype/vazirmatn \
+    && rm /tmp/vazirmatn.zip \
     && fc-cache -f \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
