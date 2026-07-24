@@ -2,7 +2,7 @@
     <h1 class="text-xl font-bold text-gray-800 mb-1">تبدیل آزمون به PDF تصویری</h1>
     <p class="text-sm text-gray-500 mb-6">فایل Word (.docx) یا JSON سوالات را آپلود کنید.</p>
 
-    <form wire:submit.prevent="upload" class="space-y-4">
+    <form wire:submit.prevent="save" class="space-y-4">
         <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-indigo-400 transition">
             <input type="file" wire:model="file" id="file" class="hidden" accept=".docx,.json">
             <label for="file" class="cursor-pointer text-indigo-600 font-medium">
@@ -24,11 +24,11 @@
         <button
             type="submit"
             wire:loading.attr="disabled"
-            wire:target="upload"
+            wire:target="save"
             class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition"
         >
-            <span wire:loading.remove wire:target="upload">شروع پردازش</span>
-            <span wire:loading wire:target="upload">در حال ارسال...</span>
+            <span wire:loading.remove wire:target="save">شروع پردازش</span>
+            <span wire:loading wire:target="save">در حال ارسال...</span>
         </button>
     </form>
 

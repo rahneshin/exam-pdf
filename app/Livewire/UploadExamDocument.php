@@ -31,7 +31,7 @@ class UploadExamDocument extends Component
 
     public ?string $currentUuid = null;
 
-    public function upload(): void
+    public function save(): void
     {
         $this->validate(
             (new StoreExamDocumentRequest())->rules(),
