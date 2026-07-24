@@ -18,8 +18,7 @@ class ImagesToPdfMerger
      */
     public function merge(array $pngAbsolutePaths, string $destinationAbsolutePath): void
     {
-        $pdf = new TCPDF(orientation: 'P', unit: 'pt', format: 'A4');
-
+        $pdf = new TCPDF('P', 'pt', 'A4');
         // Strip metadata as much as TCPDF allows.
         $pdf->SetCreator('');
         $pdf->SetAuthor('');
